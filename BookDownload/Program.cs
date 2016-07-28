@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace BookDownload
 {
@@ -35,7 +36,7 @@ namespace BookDownload
                     
                     var bookResponse = client.GetAsync(bookurl).Result;
                     string bookName = bookResponse.RequestMessage.RequestUri.Segments[bookResponse.RequestMessage.RequestUri.Segments.Length - 1];
-                    DownloadFile(bookurl, string.Concat(localFolder,bookName));
+                    DownloadFile(bookurl, string.Concat(localFolder, HttpUtility.UrlDecode(bookName)));
                     Console.WriteLine("{0} downloaded",bookName);
                 });
 
