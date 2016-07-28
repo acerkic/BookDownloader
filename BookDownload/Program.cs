@@ -31,25 +31,52 @@ namespace BookDownload
 
                 Console.WriteLine("Starting Book Download");
                 CancellationToken token = new CancellationToken(false);
-                Parallel.ForEach(books, new ParallelOptions { CancellationToken = token }, (bookurl) =>
-                {
-                    
-                    var bookResponse = client.GetAsync(bookurl).Result;
-                    string bookName = bookResponse.RequestMessage.RequestUri.Segments[bookResponse.RequestMessage.RequestUri.Segments.Length - 1];
-                    DownloadFile(bookurl, string.Concat(localFolder, HttpUtility.UrlDecode(bookName)));
-                    Console.WriteLine("{0} downloaded",bookName);
-                });
 
+                
+                    Parallel.ForEach(books, new ParallelOptions { CancellationToken = token }, (bookurl) =>
+                    {
+                        try
+                        {
+                            HttpClient n_cli = new HttpClient();
+
+                            var bookResponse = n_cli.GetAsync(bookurl).Result;
+                            string bookName = bookResponse.RequestMessage.RequestUri.Segments[bookResponse.RequestMessage.RequestUri.Segments.Length - 1];
+
+                            DownloadFile(bookurl, string.Concat(localFolder, HttpUtility.UrlDecode(bookName)));
+                            Console.WriteLine("{0} downloaded", bookName);
+                        }
+                        catch (TaskCanceledException ex)
+                        {
+
+                        }
+                        catch (Exception e)
+                        {
+
+                        }
+                    });
+               
                 Console.Write("Book Download Complete");
             }
         }
 
+        private static string ShortenName(string file)
+        {
+            if (file.Length > 250)
+            {
+                string extension = file.Substring(file.LastIndexOf('.'), 3);
+                file = string.Concat(file.Substring(0, 50), ".", extension);
+            }
+
+            return file;
+          
+            
+        }
 
         public static void DownloadFile(string url, string filePath)
         {
             WebClient cli = new WebClient();
-            cli.DownloadFile(new Uri(url), filePath);
-            
+
+            cli.DownloadFile(url, ShortenName(filePath));
         }
 
      
